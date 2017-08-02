@@ -10,10 +10,9 @@
 var chat = function(){
     let data;
 
-    let maxChatLim;
-
     let getOldChatID = 0;
     let oldChatNode = null;
+    let chatChannelSelect = null;
     let newChatNode = document.createElement("div");
 
     let chatButtons = document.createElement("div");
@@ -27,7 +26,10 @@ var chat = function(){
     let resetBtn = document.createElement("button");
     let fontUpBtn = document.createElement("button");
     let fontDnBtn = document.createElement("button");
-    // Add a reset chats button, clears all old chat messages
+    let colorPicker = document.createElement("input");
+    let colorDropDn = document.createElement("button");
+    let colorSelect = document.createElement("select");
+
 
     function saveTPTData(){
         if(typeof(Storage) !== "undefined")
@@ -36,6 +38,7 @@ var chat = function(){
 
     function loadData(){
         //localStorage.removeItem("TPTsaveData"); // Use to remove the item when changes to object are made
+
         if(typeof(Storage) !== "undefined" && localStorage.getItem("TPTsaveData") !== null){
             data = JSON.parse(localStorage.getItem("TPTsaveData"));
         }
@@ -53,19 +56,48 @@ var chat = function(){
 
                 selectChat: 0,
                 chatLim: 25,
-                fontSize: 15
+                fontSize: 15,
+                chatChannelNum: 0,
+
+                tradeChatColor: "#00FF00", // lime
+                globalChatColor: "#1E90FF", // dodgerblue
+                PMToChatColor: "#008000", // green
+                PMFromChatColor: "#008000",
+                chatLine1Color: "#000000", // black
+                chatLine2Color: "#1F1F1F" // very dark grey
             };
 
             localStorage.setItem("TPTsaveData", JSON.stringify(data));
         }
-
-        maxChatLim = 2 * data.chatLim;
     }
 
     function setFontSize(ftSize){
         data.fontSize = ftSize;
         saveTPTData();
         changeChatLimits(data.chatLim);
+    }
+
+    function getColorFromColorSelect(){
+        let sel = colorSelect.value;
+        if(sel === "Global"){
+            return data.globalChatColor;
+        }
+        if(sel === "Trade"){
+            return data.tradeChatColor;
+        }
+        if(sel === "PM TO"){
+            return data.PMToChatColor;
+        }
+        if(sel === "PM FROM"){
+            return data.PMFromChatColor;
+        }
+        if(sel === "Line 1"){
+            return data.chatLine1Color;
+        }
+        if(sel === "Line 2"){
+            return data.chatLine1Color;
+        }
+
     }
 
     function setupBtns(){
@@ -93,6 +125,17 @@ var chat = function(){
         limitInput.setAttribute("id", "inputLimit");
         limitInput.setAttribute("name", "inputLimit");
         limitInput.setAttribute("size", "3");
+        colorPicker.setAttribute("type", "color");
+
+        let frag = document.createDocumentFragment();
+        colorSelect.options.add(new Option("Global"));
+        colorSelect.options.add(new Option("Trade"));
+        colorSelect.options.add(new Option("PM TO"));
+        colorSelect.options.add(new Option("PM FROM"));
+        colorSelect.options.add(new Option("Line 1"));
+        colorSelect.options.add(new Option("Line 2"));
+
+        frag.appendChild(colorSelect);
 
         chatButtons.appendChild(publicBtn);
         chatButtons.appendChild(tradeBtn);
@@ -107,6 +150,66 @@ var chat = function(){
         chatButtons.appendChild(document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"));
         chatButtons.appendChild(fontUpBtn);
         chatButtons.appendChild(fontDnBtn);
+        chatButtons.appendChild(document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"));
+        chatButtons.appendChild(colorPicker);
+        chatButtons.appendChild(frag);
+
+        colorPicker.value = getColorFromColorSelect();
+
+        colorSelect.addEventListener("input", function() {
+            if(colorSelect.value === "Global"){
+                colorPicker.value = data.globalChatColor;
+            }
+            else if(colorSelect.value === "Trade"){
+                colorPicker.value = data.tradeChatColor;
+            }
+            else if(colorSelect.value === "PM TO"){
+                colorPicker.value = data.PMToChatColor;
+            }
+            else if(colorSelect.value === "PM FROM"){
+                colorPicker.value = data.PMFromChatColor;
+            }
+            else if(colorSelect.value === "Line 1"){
+                colorPicker.value = data.chatLine1Color;
+            }
+            else if(colorSelect.value === "Line 2"){
+                colorPicker.value = data.chatLine2Color;
+            }
+        });
+
+        colorPicker.addEventListener("input", function() {
+            if(colorSelect.value === "Global"){
+                data.globalChatColor = colorPicker.value;
+                changeChatLimits(data.chatLim); // Reset chats
+                parseChat(null);
+            }
+            else if(colorSelect.value === "Trade"){
+                data.tradeChatColor = colorPicker.value;
+                changeChatLimits(data.chatLim);
+                parseChat(null);
+            }
+            else if(colorSelect.value === "PM TO"){
+                data.PMToChatColor = colorPicker.value;
+                changeChatLimits(data.chatLim);
+                parseChat(null);
+            }
+            else if(colorSelect.value === "PM FROM"){
+                data.PMFromChatColor = colorPicker.value;
+                changeChatLimits(data.chatLim);
+                parseChat(null);
+            }
+            else if(colorSelect.value === "Line 1"){
+                data.chatLine1Color = colorPicker.value;
+                changeChatLimits(data.chatLim);
+                parseChat(null);
+            }
+            else if(colorSelect.value === "Line 2"){
+                data.chatLine2Color = colorPicker.value;
+                changeChatLimits(data.chatLim);
+                parseChat(null);
+            }
+
+        }, false);
 
         fontUpBtn.addEventListener("click", function(){
             if(data.fontSize < 30)
@@ -119,7 +222,7 @@ var chat = function(){
         });
 
         resetBtn.addEventListener("click", function(){
-            changeChatLimits(data.chatLim);
+            resetChat();
         });
 
         limitBtn.addEventListener("click", function(){
@@ -151,8 +254,9 @@ var chat = function(){
             data.tradeColor = tradeBtn.style.color = "red";
             data.publicColor = publicBtn.style.color = "red";
             data.selectChat = 3;
+            chatChannelSelect.value = 0;
             saveTPTData();
-            updateChat();
+            changeChatLimits(data.chatLim);
         });
 
         globalBtn.addEventListener("click", function(){
@@ -161,8 +265,9 @@ var chat = function(){
             data.tradeColor = tradeBtn.style.color = "red";
             data.publicColor = publicBtn.style.color = "red";
             data.selectChat = 2;
+            chatChannelSelect.value = 0;
             saveTPTData();
-            updateChat();
+            changeChatLimits(data.chatLim);
         });
 
         tradeBtn.addEventListener("click", function(){
@@ -171,8 +276,9 @@ var chat = function(){
             data.tradeColor = tradeBtn.style.color = "green";
             data.publicColor = publicBtn.style.color = "red";
             data.selectChat = 1;
+            chatChannelSelect.value = 2;
             saveTPTData();
-            updateChat();
+            changeChatLimits(data.chatLim);
         });
 
         publicBtn.addEventListener("click", function(){
@@ -181,14 +287,14 @@ var chat = function(){
             data.tradeColor = tradeBtn.style.color = "red";
             data.publicColor = publicBtn.style.color = "green";
             data.selectChat = 0;
+            chatChannelSelect.value = 0;
             saveTPTData();
-            updateChat();
+            changeChatLimits(data.chatLim);
         });
     }
 
     function changeChatLimits(newLimit){
         data.chatLim = newLimit;
-        maxChatLim = 2 * data.chatLim;
         limitCurrent.nodeValue = " Current: " + data.chatLim;
 
         data.public = []; // Delete old chats
@@ -199,43 +305,60 @@ var chat = function(){
         parseChat(null);
     }
 
+    function resetChat(){
+        localStorage.removeItem("TPTsaveData"); // Use to remove the item when changes to object are made
+        loadData();
+
+        allBtn.style.color = tradeBtn.style.color = globalBtn.style.color = "red";
+        publicBtn.style.color = "green";
+        colorSelect.value = "Global";
+        chatChannelSelect.value = 0;
+        colorPicker.value = getColorFromColorSelect();
+        parseChat(null);
+    }
+
     function parseChat(mut){
         let messages = oldChatNode.innerHTML.split("<br>");
+        data.all = [];
 
         // Sort messages into their respective chats
         for(let i = messages.length - 1; i >= 0; i -= 1){
-            let isTrade = messages[i].includes("[<span class=\"trade\">Trade</span>]");
-            let isGlobal = messages[i].includes("[<span class=\"global\">Global</span>]");
+            if(messages[i] === "Loading...") continue;
+            let isTrade = messages[i].includes("<span class=\"trade\">Trade</span>");
+            let isGlobal = messages[i].includes("<span class=\"global\">Global</span>");
+            let isPMTO = messages[i].includes("<span class=\"unknown\">PM TO</span>");
+            let isPMFROM = messages[i].includes("<span class=\"unknown\">PM FROM</span>");
             let msg = "";
 
-            // Give global / trade messages their colors back
+            // Give global / trade / PM messages their colors back
             if(isGlobal && !isTrade)
-                msg = messages[i].replace(/class=\"global\"/g, "class = \"global\" style=\"color: dodgerblue\"");
+                msg = messages[i].replace(/class=\"global\"/g, "style=\"color: " + data.globalChatColor + "\" class = \"global\"");
             else if(isTrade && !isGlobal)
-                msg = messages[i].replace(/class=\"trade\"/g, "class = \"trade\" style=\"color: lime\"");
+                msg = messages[i].replace(/class=\"trade\"/g, "style=\"color: " + data.tradeChatColor + "\" class = \"trade\"");
+            else if(isPMTO)
+                msg = messages[i].replace(/class=\"unknown\"/g, "style=\"color: " + data.PMToChatColor + "\" class = \"unknown\"");
+            else if(isPMFROM)
+                msg = messages[i].replace(/class=\"unknown\"/g, "style=\"color: " + data.PMFromChatColor + "\" class = \"unknown\"");
             else msg = messages[i];
 
             if(msg.includes("<a href=\"")) // Change font sizes of urls/usernames in chat
-                msg = msg.replace(/<a href=\"/gi, "<a  style=\"font-size: " + data.fontSize + "px;\" href=\"");
+                msg = msg.replace(/<a href=\"/gi, "<a style=\"font-size: " + data.fontSize + "px;\" href=\"");
 
-            // Put message into All chat
-            if(!isInArray(msg, data.all)){
-                data.all.splice(0, 0, msg); // Insert at beginning
-                if(data.all.length >= maxChatLim) data.all = data.all.slice(0, data.chatLim);
-            }
+            // Insert message into All chat
+            data.all.splice(0, 0, msg);
 
             // Sort the messages
             if(isGlobal && !isTrade && !isInArray(msg, data.global)){
                 data.global.splice(0, 0, msg);
-                if(data.global.length >= maxChatLim) data.global = data.global.slice(0, data.chatLim);
+                if(data.global.length > 200) data.global = data.global.slice(0, 100);
             }
             else if(!isGlobal && !isTrade && !isInArray(msg, data.public)){
                 data.public.splice(0, 0, msg);
-                if(data.public.length >= maxChatLim) data.public = data.public.slice(0, data.chatLim);
+                if(data.public.length > 200)data.public = data.public.slice(0, 100);
             }
             else if(isTrade && !isGlobal && !isInArray(msg, data.trade)){
                 data.trade.splice(0, 0, msg);
-                if(data.trade.length >= maxChatLim) data.trade = data.trade.slice(0, data.chatLim);
+                if(data.trade.length > 200) data.trade = data.trade.slice(0, 100);
             }
         }
         updateChat();
@@ -244,8 +367,8 @@ var chat = function(){
     function updateChat(){
         let msg = "";
         let alternate = true;
-        let div1 = "<div style=\"background-color: black; font-size: " + data.fontSize + "px;\">";
-        let div2 = "<div style=\"background-color: #1F1F1F; font-size: " + data.fontSize + "px;\">";
+        let div1 = "<div style=\"background-color: " + data.chatLine1Color + "; font-size: " + data.fontSize + "px;\">";
+        let div2 = "<div style=\"background-color: " + data.chatLine2Color + "; font-size: " + data.fontSize + "px;\">";
 
         if(data.selectChat === 0){
             for(let i = 0, len1 = data.public.length, len2 = data.chatLim; (i < len1) && (i < len2); i += 1){
@@ -284,6 +407,9 @@ var chat = function(){
         else{
             oldChatNode.style.display = "none"; // Hide the old chat box, make new one visible
             newChatNode.style.visibility = "visible";
+
+            chatChannelSelect = document.getElementById("chat-channel");
+            chatChannelSelect.value = data.chatChannelNum;
 
             let parent = document.getElementById("chat-area");
             parent.appendChild(chatButtons);
