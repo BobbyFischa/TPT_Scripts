@@ -3,6 +3,7 @@
 // @version      1.0
 // @description  Script to change how the chat is handled
 // @author       Bobby
+// @namespace    https://github.com/BobbyFischa/BobbyFischa.github.io
 // @include http://www.tpt-revised.co.uk/*
 // ==/UserScript==
 
