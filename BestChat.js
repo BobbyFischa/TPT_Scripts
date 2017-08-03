@@ -86,7 +86,8 @@ var chat = function(){
                 tradeChatColor: "#00FF00", // lime
                 globalChatColor: "#1E90FF", // dodgerblue
                 clanChatColor: "#FF8C00", // dark orange
-                PMToChatColor: "#008000", // green
+                clanTagColor: "#008000", // green
+                PMToChatColor: "#008000",
                 PMFromChatColor: "#008000",
                 chatLine1Color: "#000000", // black
                 chatLine2Color: "#1F1F1F" // very dark grey
@@ -104,13 +105,14 @@ var chat = function(){
 
     function getColorFromColorSelect(){
         let sel = colorSelect.value;
-        if(sel === "Global")  return data.globalChatColor;
-        if(sel === "Clan")    return data.clanChatColor;
-        if(sel === "Trade")   return data.tradeChatColor;
-        if(sel === "PM TO")   return data.PMToChatColor;
-        if(sel === "PM FROM") return data.PMFromChatColor;
-        if(sel === "Line 1")  return data.chatLine1Color;
-        if(sel === "Line 2")  return data.chatLine1Color;
+        if(sel === "Global")   return data.globalChatColor;
+        if(sel === "Clan")     return data.clanChatColor;
+        if(sel === "Clan Tag") return data.clanTagColor;
+        if(sel === "Trade")    return data.tradeChatColor;
+        if(sel === "PM TO")    return data.PMToChatColor;
+        if(sel === "PM FROM")  return data.PMFromChatColor;
+        if(sel === "Line 1")   return data.chatLine1Color;
+        if(sel === "Line 2")   return data.chatLine1Color;
     }
 
     function setupBtns(){
@@ -145,6 +147,7 @@ var chat = function(){
         colorSelect.options.add(new Option("Global"));
         colorSelect.options.add(new Option("Trade"));
         colorSelect.options.add(new Option("Clan"));
+        colorSelect.options.add(new Option("Clan Tag"));
         colorSelect.options.add(new Option("PM TO"));
         colorSelect.options.add(new Option("PM FROM"));
         colorSelect.options.add(new Option("Line 1"));
@@ -174,18 +177,20 @@ var chat = function(){
         colorPicker.value = getColorFromColorSelect();
 
         colorSelect.addEventListener("input", function() {
-            if(colorSelect.value === "Global")  colorPicker.value = data.globalChatColor;
-            else if(colorSelect.value === "Clan")    colorPicker.value = data.clanChatColor;
-            else if(colorSelect.value === "Trade")   colorPicker.value = data.tradeChatColor;
-            else if(colorSelect.value === "PM TO")   colorPicker.value = data.PMToChatColor;
-            else if(colorSelect.value === "PM FROM") colorPicker.value = data.PMFromChatColor;
-            else if(colorSelect.value === "Line 1")  colorPicker.value = data.chatLine1Color;
-            else if(colorSelect.value === "Line 2")  colorPicker.value = data.chatLine2Color;
+            if(colorSelect.value === "Global")        colorPicker.value = data.globalChatColor;
+            else if(colorSelect.value === "Clan")     colorPicker.value = data.clanChatColor;
+            else if(colorSelect.value === "Clan Tag") colorPicker.value = data.clanTagColor;
+            else if(colorSelect.value === "Trade")    colorPicker.value = data.tradeChatColor;
+            else if(colorSelect.value === "PM TO")    colorPicker.value = data.PMToChatColor;
+            else if(colorSelect.value === "PM FROM")  colorPicker.value = data.PMFromChatColor;
+            else if(colorSelect.value === "Line 1")   colorPicker.value = data.chatLine1Color;
+            else if(colorSelect.value === "Line 2")   colorPicker.value = data.chatLine2Color;
         });
 
         colorPicker.addEventListener("input", function() {
-            if(colorSelect.value === "Global")  data.globalChatColor = colorPicker.value;
+            if(colorSelect.value === "Global")       data.globalChatColor = colorPicker.value;
             else if(colorSelect.value === "Clan")    data.clanChatColor = colorPicker.value;
+            else if(colorSelect.value === "Clan Tag")data.clanTagColor = colorPicker.value;
             else if(colorSelect.value === "Trade")   data.tradeChatColor = colorPicker.value;
             else if(colorSelect.value === "PM TO")   data.PMToChatColor = colorPicker.value;
             else if(colorSelect.value === "PM FROM") data.PMFromChatColor = colorPicker.value;
@@ -368,7 +373,8 @@ var chat = function(){
                 parseMsg(msg, "public");
             }
             else{
-                msg = messages[i];
+                msg = messages[i].replace(/class=\"clantag\"/g, "style=\"color: " + data.clanTagColor + "\" class = \"clantag\"");
+                console.log(msg);
                 parseMsg(msg, "public");
             }
 
@@ -392,7 +398,7 @@ var chat = function(){
     }
 
     function updateChat(){
-        if(data.selectChat === 0) printChat(data.public);
+        if(data.selectChat === 0)      printChat(data.public);
         else if(data.selectChat === 1) printChat(data.trade);
         else if(data.selectChat === 2) printChat(data.global);
         else if(data.selectChat === 3) printChat(data.all);
