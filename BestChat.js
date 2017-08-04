@@ -6,25 +6,21 @@
 // @namespace    https://github.com/BobbyFischa/BobbyFischa.github.io
 // @include http://www.tpt-revised.co.uk/*
 // ==/UserScript==
-
 /*
 User Manual
 
 This script will parse the old chat and sort the messages into public, clan, trade, and global chats.
 
-Every time you change channels, the chat history of the tabs will be deleted to prevent using too much memory,
-but it won't delete the chat history if you stay in the same chat channel.
-
 Clicking either the Public, Clan, or Trade channels will also change the dropdown menu value for the channel selection.
 
 Change Chat Limit:
-Enter a number between 10-50 into the text box, and click the "New Chat Limit" button to increase/decrease
+Enter a number between 10-100 into the text box, and click the "New Chat Limit" button to increase/decrease
 the # of total lines shown in the chat.
 
-Change Font Size: +/- increase/decrease the size of the fonts
+Change Font Size: +/- increase/decrease the size of the fonts, resets chat history.
 
 Change Colors of Elements:
-Select an element in the dropdown, then select a color using the color palette.
+Select an element in the dropdown, then select a color using the color palette, resets chat history.
 
 Reset:
 Resets all elements to their defaults, including font size, colors, chat history, chat limits, and current channel.
@@ -48,6 +44,7 @@ var chat = function(){
     let limitBtn = document.createElement("button");
     let limitCurrent = document.createTextNode(" Current: ");
     let resetBtn = document.createElement("button");
+    let clearBtn = document.createElement("button");
     let fontUpBtn = document.createElement("button");
     let fontDnBtn = document.createElement("button");
     let colorPicker = document.createElement("input");
@@ -79,7 +76,7 @@ var chat = function(){
                 clanColor: "red",
 
                 selectChat: 0,
-                chatLim: 25,
+                chatLim: 50,
                 fontSize: 15,
                 chatChannelNum: 0,
 
@@ -99,8 +96,8 @@ var chat = function(){
 
     function setFontSize(ftSize){
         data.fontSize = ftSize;
-        saveTPTData();
-        changeChatLimits(data.chatLim);
+        resetChats();
+        parseChat(null);
     }
 
     function getColorFromColorSelect(){
@@ -123,6 +120,7 @@ var chat = function(){
         allBtn.innerHTML = "All";
         limitBtn.innerHTML = "New Chat Limit";
         resetBtn.innerHTML = "Reset";
+        clearBtn.innerHTML = "Clear";
         fontUpBtn.innerHTML = "FtS+";
         fontDnBtn.innerHTML = "FtS-";
         limitCurrent.nodeValue = " Current: " + data.chatLim;
@@ -137,12 +135,19 @@ var chat = function(){
         allBtn.style.color = data.allColor;
         clanBtn.style.color = data.clanColor;
         resetBtn.style.color = "red";
+        clearBtn.style.color = "red";
 
         limitInput.setAttribute("type", "text");
         limitInput.setAttribute("id", "inputLimit");
         limitInput.setAttribute("name", "inputLimit");
         limitInput.setAttribute("size", "3");
         colorPicker.setAttribute("type", "color");
+
+        colorPicker.setAttribute("title", "*Clears Chat History");
+        fontUpBtn.setAttribute("title", "*Clears Chat History");
+        fontDnBtn.setAttribute("title", "*Clears Chat History");
+        clearBtn.setAttribute("title", "*Clears Chat History");
+        resetBtn.setAttribute("title", "*Clear chat history, reset colors/limits, etc");
 
         colorSelect.options.add(new Option("Global"));
         colorSelect.options.add(new Option("Trade"));
@@ -161,6 +166,8 @@ var chat = function(){
         chatButtons.appendChild(tradeBtn);
         chatButtons.appendChild(globalBtn);
         chatButtons.appendChild(allBtn);
+        chatButtons.appendChild(document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"));
+        chatButtons.appendChild(clearBtn);
         chatButtons.appendChild(document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"));
         chatButtons.appendChild(limitInput);
         chatButtons.appendChild(limitBtn);
@@ -197,7 +204,7 @@ var chat = function(){
             else if(colorSelect.value === "Line 1")  data.chatLine1Color = colorPicker.value;
             else if(colorSelect.value === "Line 2")  data.chatLine2Color = colorPicker.value;
 
-            changeChatLimits(data.chatLim); // Reset chats
+            resetChats();
             parseChat(null);
         }, false);
 
@@ -213,6 +220,11 @@ var chat = function(){
             if(confirm("Will reset colors, font size, chat limits, and tabs, continue?")) resetChat();
         });
 
+        clearBtn.addEventListener("click", function(){
+            resetChats();
+            parseChat(null);
+        });
+
         limitBtn.addEventListener("click", function(){
             let node = document.getElementById("inputLimit");
 
@@ -222,13 +234,13 @@ var chat = function(){
                 numb = (numb === null) ? null : numb.join("");
 
                 if(numb === null || numb.length > 3 || numb.length < 1){
-                    alert("Invalid input. Enter a number between 10 and 50");
+                    alert("Invalid input. Enter a number between 10 and 100");
                     return;
                 }
                 let num = parseInt(numb);
 
-                if(!num || num < 10 || num > 50){
-                    alert("Invalid input. Enter a number between 10 and 50");
+                if(!num || num < 10 || num > 100){
+                    alert("Invalid input. Enter a number between 10 and 100");
                     return;
                 }
 
@@ -243,7 +255,7 @@ var chat = function(){
             data.selectChat = 4;
             chatChannelSelect.value = 1;
             saveTPTData();
-            changeChatLimits(data.chatLim);
+            parseChat(null);
         });
 
         allBtn.addEventListener("click", function(){
@@ -253,7 +265,7 @@ var chat = function(){
             data.selectChat = 3;
             chatChannelSelect.value = 0;
             saveTPTData();
-            changeChatLimits(data.chatLim);
+            parseChat(null);
         });
 
         globalBtn.addEventListener("click", function(){
@@ -263,7 +275,7 @@ var chat = function(){
             data.selectChat = 2;
             chatChannelSelect.value = 0;
             saveTPTData();
-            changeChatLimits(data.chatLim);
+            parseChat(null);
         });
 
         tradeBtn.addEventListener("click", function(){
@@ -273,7 +285,7 @@ var chat = function(){
             data.selectChat = 1;
             chatChannelSelect.value = 2;
             saveTPTData();
-            changeChatLimits(data.chatLim);
+            parseChat(null);
         });
 
         publicBtn.addEventListener("click", function(){
@@ -283,14 +295,11 @@ var chat = function(){
             data.selectChat = 0;
             chatChannelSelect.value = 0;
             saveTPTData();
-            changeChatLimits(data.chatLim);
+            parseChat(null);
         });
     }
 
-    function changeChatLimits(newLimit){
-        data.chatLim = newLimit;
-        limitCurrent.nodeValue = " Current: " + data.chatLim;
-
+    function resetChats(){
         // Delete old chats
         data.public = [];
         data.global = [];
@@ -298,6 +307,11 @@ var chat = function(){
         data.clan = [];
         data.all = [];
         saveTPTData();
+    }
+
+    function changeChatLimits(newLimit){
+        data.chatLim = newLimit;
+        limitCurrent.nodeValue = " Current: " + data.chatLim;
         parseChat(null);
     }
 
@@ -317,25 +331,25 @@ var chat = function(){
         if(chat === "public"){
             if(!isInArray(msg, data.public)){
                 data.public.splice(0, 0, msg);
-                if(data.public.length > 200)data.public = data.public.slice(0, 100);
+                if(data.public.length > 250)data.public = data.public.slice(0, 125);
             }
         }
         else if(chat === "clan"){
             if(!isInArray(msg, data.clan)){
                 data.clan.splice(0, 0, msg);
-                if(data.clan.length > 200) data.clan = data.clan.slice(0, 100);
+                if(data.clan.length > 250) data.clan = data.clan.slice(0, 125);
             }
         }
         else if(chat === "trade"){
             if(!isInArray(msg, data.trade)){
                 data.trade.splice(0, 0, msg);
-                if(data.trade.length > 200) data.trade = data.trade.slice(0, 100);
+                if(data.trade.length > 250) data.trade = data.trade.slice(0, 125);
             }
         }
         else if(chat === "global"){
             if(!isInArray(msg, data.global)){
                 data.global.splice(0, 0, msg);
-                if(data.global.length > 200) data.global = data.global.slice(0, 100);
+                if(data.global.length > 250) data.global = data.global.slice(0, 125);
             }
         }
     }
@@ -346,6 +360,7 @@ var chat = function(){
 
         // Sort messages into their respective chats
         for(let i = messages.length - 1; i >= 0; i -= 1){
+            if(messages[i] === "Loading...") continue;
             let msg = "";
 
             if(messages[i].includes("<a href=\"")) // Change font sizes of urls/usernames in chat
@@ -374,7 +389,6 @@ var chat = function(){
             }
             else{
                 msg = messages[i].replace(/class=\"clantag\"/g, "style=\"color: " + data.clanTagColor + "\" class = \"clantag\"");
-                console.log(msg);
                 parseMsg(msg, "public");
             }
 
@@ -410,9 +424,14 @@ var chat = function(){
         else{
             oldChatNode.style.display = "none"; // Hide the old chat box, make new one visible
             newChatNode.style.visibility = "visible";
-
             chatChannelSelect = document.getElementById("chat-channel");
-            chatChannelSelect.value = data.chatChannelNum;
+
+            if(data.selectChat === 0 || data.selectChat === 2 || data.selectChat === 3)
+                chatChannelSelect.value = 0;
+            else if(data.selectChat === 1)
+                chatChannelSelect.value = 2;
+            else if(data.selectChat === 4)
+                chatChannelSelect.value = 1;
 
             let parent = document.getElementById("chat-area");
             parent.appendChild(chatButtons);
