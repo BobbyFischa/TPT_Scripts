@@ -31,7 +31,7 @@ Resets colors, chat history, tab position, chat limits, etc.
 Font Size:
 Increase/Decrease the font size. Will reset chat histories.
 
-Changing Colors:
+Changing Colors: 
 Use the dropdown to select what element you want to change, then select a color and press OK. This will reset chat histories.
 */
 var chat = function(){
