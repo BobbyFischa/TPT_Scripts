@@ -12,7 +12,6 @@ Chat Movement:
 Press tab to tab to the channel on the right. Hold shift and press tab to go one channel to the left.
 You can also click on each of the 6 channels.
 
-<<<<<<< HEAD
 SettingUp PMs:
 Click the "Add" button. Enter a player's ID, followed by a comma, and their name, and then click "Add Player".
 This will add their ID to a drop down menu to the right of those buttons. Selecting someone's ID will automatically
@@ -33,32 +32,6 @@ Font Size:
 Increase/Decrease the font size. Will reset chat histories.
 
 Changing Colors:
-=======
-Chat Movement: 
-Press tab to tab to the channel on the right. Hold shift and press tab to go one channel to the left. 
-You can also click on each of the 6 channels.
-
-SettingUp PMs:
-Click the "Add" button. Enter a player's ID, followed by a comma, and their name, and then click "Add Player".
-This will add their ID to a drop down menu to the right of those buttons. Selecting someone's ID will automatically
-add the /m # PM command to the chat box whenever you access the PM tab. You can remove a player's ID by selecting
-their ID, and clicking "Remove Selected".
-
-Clear: 
-This will delete the all chat history, and will resort the old chat's messages into their appropriate channels.
-
-Chat Limits: 
-Change the maximum # of lines in each channel by entering a number between 10 and 100, and pressing
-"New Chat Limit". This will not delete the chat histories of each channel.
-
-Reset: 
-Resets colors, chat history, tab position, chat limits, etc.
-
-Font Size: 
-Increase/Decrease the font size. Will reset chat histories.
-
-Changing Colors: 
->>>>>>> c4a72585001e04e39486369012b8e278c0cb578c
 Use the dropdown to select what element you want to change, then select a color and press OK. This will reset chat histories.
 */
 var chat = function(){
@@ -127,7 +100,7 @@ var chat = function(){
         shiftKey = e.shiftKey; // Detect shift press
     });
 
-    $( document ).keydown(function(e) { // Handle tabbing / shift tabbing
+    $(document).keydown(function(e) { // Handle tabbing / shift tabbing
         var keycode = (e.which) ? e.which : e.keyCode;
 
         if(keycode == 9){
@@ -338,8 +311,6 @@ var chat = function(){
         chatButtons.appendChild(frag);
 
         colorPicker.value = getColorFromColorSelect();
-
-
         PMChatSelect.value = data.currentPMSelect;
 
         // Remove a player's ID/name from the PM Player Select dropdown
