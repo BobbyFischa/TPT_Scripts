@@ -8,14 +8,37 @@
 // ==/UserScript==
 /*
 User Manual
+Chat Movement:
+Press tab to tab to the channel on the right. Hold shift and press tab to go one channel to the left.
+You can also click on each of the 6 channels.
 
+SettingUp PMs:
+Click the "Add" button. Enter a player's ID, followed by a comma, and their name, and then click "Add Player".
+This will add their ID to a drop down menu to the right of those buttons. Selecting someone's ID will automatically
+add the /m # PM command to the chat box whenever you access the PM tab. You can remove a player's ID by selecting
+their ID, and clicking "Remove Selected".
 
+Clear:
+This will delete the all chat history, and will resort the old chat's messages into their appropriate channels.
+
+Chat Limits:
+Change the maximum # of lines in each channel by entering a number between 10 and 100, and pressing
+"New Chat Limit". This will not delete the chat histories of each channel.
+
+Reset:
+Resets colors, chat history, tab position, chat limits, etc.
+
+Font Size:
+Increase/Decrease the font size. Will reset chat histories.
+
+Changing Colors:
+Use the dropdown to select what element you want to change, then select a color and press OK. This will reset chat histories.
 */
 var chat = function(){
     let data;
     let newMsgCountActive = false;
     let shiftKey = false;
-    
+
     // Unread Messages Counts
     let publicUnreadCount = 0;
     let tradeUnreadCount = 0;
@@ -39,12 +62,12 @@ var chat = function(){
     let PMBtn = document.createElement("button");
     let allBtn = document.createElement("button");
     let clanBtn = document.createElement("button");
-    
+
     // Chat Limit
     let limitInput = document.createElement("input");
     let limitBtn = document.createElement("button");
     let limitCurrent = document.createTextNode(" Current: ");
-    
+
     // Option Buttons
     let optionsBtn = document.createElement("button");
     let resetBtn = document.createElement("button");
@@ -105,7 +128,7 @@ var chat = function(){
             else if(data.selectChat === 5) globalBtn.click();
         }
     }
-    
+
     // Saves the data object into local storage
     function saveTPTData(){
         if(typeof(Storage) !== "undefined")
@@ -127,7 +150,7 @@ var chat = function(){
                 clan: [],
                 all: [],
                 PM: [],
-                
+
                 // Player PM select array
                 PMSelect: [],
                 currentPMSelect: "PM Select Channel",
@@ -216,7 +239,7 @@ var chat = function(){
         limitInput.setAttribute("type", "text");
         limitInput.setAttribute("id", "inputLimit");
         limitInput.setAttribute("size", "5");
-        
+
         // Init Option Buttons
         fontUpBtn.setAttribute("title", "*Clears Chat History");
         fontDnBtn.setAttribute("title", "*Clears Chat History");
@@ -226,7 +249,7 @@ var chat = function(){
         // Init Color Picker
         colorPicker.setAttribute("type", "color");
         colorPicker.setAttribute("title", "*Clears Chat History");
-        
+
         // Init Color Select Dropdown
         let frag = document.createDocumentFragment();
         colorSelect.options.add(new Option("Global"));
@@ -246,7 +269,7 @@ var chat = function(){
         for(let i = 0, len = data.PMSelect.length; i < len; i += 1){
             PMChatSelect.options.add(new Option(data.PMSelect[i]));
         }
-        
+
         //PMChatSelect.value = data.currentPMSelect;
 
         // Init Options as hidden
@@ -286,10 +309,10 @@ var chat = function(){
         chatButtons.appendChild(document.createTextNode("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"));
         chatButtons.appendChild(colorPicker);
         chatButtons.appendChild(frag);
-        
+
         colorPicker.value = getColorFromColorSelect();
-        
-        
+
+
         PMChatSelect.value = data.currentPMSelect;
 
         // Remove a player's ID/name from the PM Player Select dropdown
@@ -582,6 +605,10 @@ var chat = function(){
         globalBtn.innerHTML = "Global\u00A0\u00A0";
         clanBtn.innerHTML = "Clan\u00A0\u00A0";
         PMBtn.innerHTML = "PM\u00A0\u00A0";
+
+        for(let i = PMChatSelect.options.length - 1; i >= 1; i -= 1){
+            PMChatSelect.remove(i); // Remove players from PM Chat Select
+        }
 
         parseChat(null);
         newMsgCountActive = true;
