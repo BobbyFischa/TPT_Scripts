@@ -12,7 +12,6 @@ Chat Movement:
 Press tab to tab to the channel on the right. Hold shift and press tab to go one channel to the left.
 You can also click on each of the 6 channels.
 
-<<<<<<< HEAD
 SettingUp PMs:
 Click the "Add" button. Enter a player's ID, followed by a comma, and their name, and then click "Add Player".
 This will add their ID to a drop down menu to the right of those buttons. Selecting someone's ID will automatically
